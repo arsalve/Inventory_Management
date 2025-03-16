@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="styles/dashboard.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+    <script>
+        let token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        } else {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const role = payload.role;
+            if (role !== 'admin') {
+                window.location.href = 'dashboard.html';
+            }
+        }
+    </script>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+        <a class="navbar-brand" href="#">Inventory Management</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="btn btn-primary nav-link" href="dashboard.html">Inventory Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="used-items.html">Used Items Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="customer-management.html">Customer Management</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="user-management.html">User Management</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="add-user.html">Add User</a>
+                </li>
+            </ul>
+            <span class="navbar-text" id="userRoleBox" style="border: 1px solid white; padding: 5px; border-radius: 5px; margin-left: auto;"></span>
+        </div>
+    </nav>
+
+    <!-- Add User Form -->
+    <div class="container mt-5">
+        <h1 class="text-center">Add User</h1>
+        <form id="addUserForm">
+            <div class="form-group">
+                <input type="text" id="username" class="form-control" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="email" class="form-control" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" class="form-control" placeholder="Password" required>
+            </div>
+            <div class="form-group">
+                <select id="role" class="form-control" required>
+                    <option value="" disabled selected>Select Role</option>
+                    <option value="admin">Admin</option>
+                    <option value="staff">Staff</option>
+                    <option value="customer">Customer</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">Add User</button>
+        </form>
+    </div>
+
+    <!-- Users Table -->
+    <div class="container mt-5">
+        <h1 class="text-center">All Users</h1>
+        <table id="usersTable" class="table table-striped table-dark">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Users will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal" id="loadingModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-light" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Credentials Modal -->
+    <div class="modal" id="credentialsModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title">Re-authenticate</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="credentialsForm">
+                        <div class="form-group">
+                            <input type="text" id="modalUsername" class="form-control" placeholder="Username" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="modalPassword" class="form-control" placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        if (token) {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const role = payload.role;
+            if (role === 'admin') {
+                document.getElementById('userRoleBox').textContent = 'Admin User';
+            }
+        }
+
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ username, email, password, role })
+            });
+
+            hideLoading();
+            if (response.ok) {
+                alert('User added successfully');
+                document.getElementById('addUserForm').reset();
+                fetchUsers();
+            } else {
+                alert('Failed to add user');
+                if (response.status === 401 || response.status === 403) {
+                    $('#credentialsModal').modal('show');
+                }
+            }
+        });
+
+        document.getElementById('credentialsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('modalUsername').value;
+            const password = document.getElementById('modalPassword').value;
+
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);
+                token = data.token; // Update the token variable
+                $('#credentialsModal').modal('hide');
+                fetchUsers();
+            } else {
+                alert('Failed to re-authenticate');
+            }
+        });
+
+        async function fetchUsers() {
+            showLoading();
+            const response = await fetch('/api/auth/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const users = await response.json();
+                const tableBody = document.getElementById('usersTable').querySelector('tbody');
+                tableBody.innerHTML = '';
+
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                alert('Failed to fetch users');
+                if (response.status === 401 || response.status === 403) {
+                    $('#credentialsModal').modal('show');
+                }
+            }
+
+            hideLoading();
+        }
+
+        function showLoading() {
+            $('#loadingModal').modal('show');
+        }
+
+        function hideLoading() {
+            $('#loadingModal').modal('hide');
+        }
+
+        // Fetch users when the page loads
+        fetchUsers();
+    </script>
+</body>
+</html>

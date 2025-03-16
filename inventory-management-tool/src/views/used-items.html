@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Used Items Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="styles/dashboard.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+        <a class="navbar-brand" href="#">Inventory Management</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="btn btn-primary nav-link" href="dashboard.html">Inventory Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="used-items.html">Used Items Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="customer-management.html">Customer Management</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="user-management.html">User Management</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="add-user-customer.html">Add User/Customer</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Used Items Table -->
+    <div class="container mt-5">
+        <h1 class="text-center">Used Items Dashboard</h1>
+        <table id="usedItemsTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Quantity Used</th>
+                    <th>Used By</th>
+                    <th>Reason</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Used items will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal" id="loadingModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Credentials Modal -->
+    <div class="modal" id="credentialsModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title">Re-authenticate</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="credentialsForm">
+                        <div class="form-group">
+                            <input type="text" id="modalUsername" class="form-control" placeholder="Username" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="modalPassword" class="form-control" placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let token = localStorage.getItem('token');
+        if (!token) {
+            $('#credentialsModal').modal('show');
+        }
+
+        document.getElementById('credentialsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('modalUsername').value;
+            const password = document.getElementById('modalPassword').value;
+
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);
+                token = data.token; // Update the token variable
+                $('#credentialsModal').modal('hide');
+                fetchUsedItems();
+            } else {
+                alert('Failed to re-authenticate');
+            }
+        });
+
+        async function fetchUsedItems() {
+            showLoading();
+            const response = await fetch('/api/inventory/used', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const usedItems = await response.json();
+                const tableBody = document.getElementById('usedItemsTable').querySelector('tbody');
+                tableBody.innerHTML = '';
+
+                usedItems.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.quantityUsed}</td>
+                        <td>${item.usedBy}</td>
+                        <td>${item.reason}</td>
+                        <td>${new Date(item.date).toLocaleDateString()}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                alert('Failed to fetch used items');
+                if (response.status === 401 || response.status === 403) {
+                    $('#credentialsModal').modal('show');
+                }
+            }
+
+            hideLoading();
+        }
+
+        function showLoading() {
+            $('#loadingModal').modal('show');
+        }
+
+        function hideLoading() {
+            $('#loadingModal').modal('hide');
+        }
+
+        // Fetch used items when the page loads
+        fetchUsedItems();
+    </script>
+</body>
+</html>

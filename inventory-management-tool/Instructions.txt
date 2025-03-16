@@ -1,0 +1,21 @@
+# Inventory Management Tool Setup Guide
+
+This guide will help you set up and use the Inventory Management Tool on your computer.
+
+## Prerequisites
+
+Before you start, make sure you have the following installed on your computer:
+1. Node.js (v14 or higher)
+2. npm (v6 or higher)
+3. A MongoDB Atlas account
+
+## Step-by-Step Instructions
+
+### 1. Clone the Repository
+
+1. Open your web browser and go to the GitHub repository page.
+2. Click on the "Code" button and copy the repository URL.
+3. Open a terminal or command prompt on your computer.
+4. Type the following command and press Enter:
+   ```sh
+   git clone <repository-url>

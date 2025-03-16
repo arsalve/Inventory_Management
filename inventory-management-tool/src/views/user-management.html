@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="styles/dashboard.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        } else {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const role = payload.role;
+                if (role !== 'admin') {
+                    window.location.href = 'dashboard.html';
+                }
+            } catch (e) {
+                console.error('Invalid token:', e);
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+        <a class="navbar-brand" href="#">Inventory Management</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="btn btn-primary nav-link" href="dashboard.html">Inventory Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="used-items.html">Used Items Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="customer-management.html">Customer Management</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-secondary nav-link" href="user-management.html">User Management</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- User Management Table -->
+    <div class="container mt-5">
+        <h1 class="text-center">User Management</h1>
+        <table id="userTable" class="table table-striped table-dark">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Users will be populated here -->
+            </tbody>
+        </table>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#createUserModal">Add User</button>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-labelledby="createUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createUserModalLabel">Add User</h5>
+                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createUserForm">
+                        <div class="form-group">
+                            <input type="text" id="username" class="form-control" placeholder="Username" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" class="form-control" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="password" class="form-control" placeholder="Password" required>
+                        </div>
+                        <div class="form-group">
+                            <select id="role" class="form-control" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="admin">Admin</option>
+                                <option value="staff">Staff</option>
+                                <option value="customer">Customer</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Add User</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal" id="loadingModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-light" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="scripts/user-management.js"></script>
+</body>
+</html>
