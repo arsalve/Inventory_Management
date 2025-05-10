@@ -6,8 +6,16 @@
     <title>Add User</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="styles/dashboard.css" rel="stylesheet">
+    <link href="styles/styles.css" rel="stylesheet">
 </head>
 <body class="bg-dark text-light">
+    <!-- Include the common top navigation bar -->
+    <div id="navbar"></div>
+    <script>
+        fetch('common/navbar.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('navbar').innerHTML = data);
+    </script>
     <script>
         let token = localStorage.getItem('token');
         if (!token) {
@@ -20,30 +28,6 @@
             }
         }
     </script>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        <a class="navbar-brand" href="#">Inventory Management</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="btn btn-primary nav-link" href="dashboard.html">Inventory Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="used-items.html">Used Items Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="customer-management.html">Customer Management</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="user-management.html">User Management</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="add-user.html">Add User</a>
-                </li>
-            </ul>
-            <span class="navbar-text" id="userRoleBox" style="border: 1px solid white; padding: 5px; border-radius: 5px; margin-left: auto;"></span>
-        </div>
-    </nav>
 
     <!-- Add User Form -->
     <div class="container mt-5">
@@ -64,6 +48,7 @@
                     <option value="admin">Admin</option>
                     <option value="staff">Staff</option>
                     <option value="customer">Customer</option>
+                    <option value="supplier">Supplier</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-success">Add User</button>

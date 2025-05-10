@@ -6,31 +6,16 @@
     <title>Used Items Dashboard</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="styles/dashboard.css" rel="stylesheet">
+    <link href="styles/styles.css" rel="stylesheet">
 </head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        <a class="navbar-brand" href="#">Inventory Management</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="btn btn-primary nav-link" href="dashboard.html">Inventory Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="used-items.html">Used Items Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="customer-management.html">Customer Management</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="user-management.html">User Management</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="add-user-customer.html">Add User/Customer</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+<body class="bg-dark text-light">
+    <!-- Include the common top navigation bar -->
+    <div id="navbar"></div>
+    <script>
+        fetch('common/navbar.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('navbar').innerHTML = data);
+    </script>
 
     <!-- Used Items Table -->
     <div class="container mt-5">
@@ -160,6 +145,11 @@
 
         function hideLoading() {
             $('#loadingModal').modal('hide');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
         }
 
         // Fetch used items when the page loads

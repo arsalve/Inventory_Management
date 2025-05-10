@@ -1,17 +1,21 @@
 const mongoose = require('mongoose');
 
-/**
- * Inventory Schema
- * @typedef {Object} Inventory
- * @property {string} name - The name of the inventory item.
- * @property {number} quantity - The quantity of the inventory item.
- * @property {number} price - The price of the inventory item.
- * @property {number} receivePrice - The price at which the inventory item was received.
- * @property {number} sellPrice - The price at which the inventory item is sold.
- * @property {Date} expiryDate - The expiry date of the inventory item.
- * @property {string} itemType - The type/category of the inventory item.
- * @property {Array<Object>} usageHistory - The history of item usage.
- */
+// Schema for item types with max quantity
+const itemTypeSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    maxQuantity: {
+        type: Number,
+        required: true,
+        default: 100 // Default max quantity
+    }
+});
+
+const ItemType = mongoose.model('ItemType', itemTypeSchema);
+
 const inventorySchema = new mongoose.Schema({
     name: {
         type: String,
@@ -37,7 +41,7 @@ const inventorySchema = new mongoose.Schema({
         required: true,
         min: 0
     },
-    expiryDate: {
+    addedDate: {
         type: Date,
         required: true
     },
@@ -72,10 +76,6 @@ const inventorySchema = new mongoose.Schema({
     ]
 });
 
-/**
- * Inventory Model
- * @type {mongoose.Model<Inventory>}
- */
 const Inventory = mongoose.model('Inventory', inventorySchema);
 
-module.exports = Inventory;
+module.exports = { Inventory, ItemType };

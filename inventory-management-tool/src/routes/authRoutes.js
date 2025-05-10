@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, getUsers } = require('../controllers/authController');
+const { registerUser, loginUser, getUsers, deleteUser } = require('../controllers/authController');
 const { expressjwt: jwt } = require('express-jwt');
 
 /**
@@ -37,5 +37,17 @@ router.post('/login', loginUser);
  * @param {function} handler - Controller function to handle the request.
  */
 router.get('/users', jwt({ secret: process.env.SECRET_KEY, algorithms: ['HS256'], requestProperty: 'auth' }), getUsers);
+
+/**
+ * Route to delete a user by ID.
+ * @name DELETE /api/auth/users/:id
+ * @function
+ * @memberof module:routes/authRoutes
+ * @inner
+ * @param {string} path - Express path.
+ * @param {function} middleware - JWT middleware to verify token.
+ * @param {function} handler - Controller function to handle the request.
+ */
+router.delete('/users/:id', jwt({ secret: process.env.SECRET_KEY, algorithms: ['HS256'], requestProperty: 'auth' }), deleteUser);
 
 module.exports = router;

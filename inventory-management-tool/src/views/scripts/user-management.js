@@ -2,7 +2,10 @@
 function getToken() {
     return localStorage.getItem('token');
 }
-
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+}
 /**
  * Show the loading modal.
  */
@@ -62,42 +65,79 @@ async function ensureToken() {
     return token;
 }
 
-/**
- * Fetch all users and populate the table.
- */
+// Fetch all users and populate the table
 async function fetchUsers() {
-    showLoading();
-    const token = await ensureToken();
+    const token = localStorage.getItem('token');
     if (!token) {
-        hideLoading();
+        alert('You are not authorized. Please log in.');
+        window.location.href = 'login.html';
         return;
     }
 
-    const response = await fetch('/api/auth/users', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-
-    if (response.ok) {
-        const users = await response.json();
-        const tableBody = document.getElementById('userTable').querySelector('tbody');
-        tableBody.innerHTML = '';
-
-        users.forEach(user => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${user.username}</td>
-                <td>${user.email}</td>
-                <td>${user.role}</td>
-            `;
-            tableBody.appendChild(row);
+    try {
+        const response = await fetch('/api/auth/users', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
-    } else {
-        alert('Failed to fetch users');
+
+        if (response.ok) {
+            const users = await response.json();
+            const tableBody = document.getElementById('userTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } else {
+            const error = await response.json();
+            alert(`Failed to fetch users: ${error.message}`);
+        }
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        alert('An error occurred while fetching users.');
+    }
+}
+
+// Delete a user by ID
+async function deleteUser(userId) {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('You are not authorized. Please log in.');
+        window.location.href = 'login.html';
+        return;
     }
 
-    hideLoading();
+    try {
+        const response = await fetch(`/api/auth/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            alert('User deleted successfully');
+            fetchUsers(); // Refresh the table
+        } else {
+            const error = await response.json();
+            alert(`Failed to delete user: ${error.message}`);
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('An error occurred while deleting the user.');
+    }
 }
 
 /**
@@ -138,4 +178,4 @@ document.getElementById('createUserForm').addEventListener('submit', async (e) =
 });
 
 // Fetch users when the page loads
-fetchUsers();
+document.addEventListener('DOMContentLoaded', fetchUsers);

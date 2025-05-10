@@ -26,6 +26,17 @@ router.get('/', requireRoles(['admin', 'staff']), inventoryController.getAllItem
 router.post('/create', requireRoles(['admin', 'staff']), inventoryController.createItem);
 
 /**
+ * Admin-only route to update max quantity for an item type.
+ * @name put/update-max-quantity
+ * @function
+ * @memberof module:routes/inventoryRoutes
+ * @inner
+ * @param {string} path - Express path.
+ * @param {function} middleware - Express middleware.
+ */
+router.put('/update-max-quantity', requireRoles(['admin']), inventoryController.updateMaxQuantity);
+
+/**
  * Route to use an inventory item by reducing its quantity.
  * @name put/use/:id
  * @function
@@ -58,4 +69,26 @@ router.put('/remove/:id', requireRoles(['admin', 'staff']), inventoryController.
  */
 router.get('/used', requireRoles(['admin', 'staff', 'customer']), inventoryController.getUsedItems);
 
+/**
+ * Route to get the current quantity and max quantity for an item type.
+ * @name get/quantity
+ * @function
+ * @memberof module:routes/inventoryRoutes
+ * @inner
+ * @param {string} path - Express path.
+ * @param {function} middleware - Express middleware.
+ */
+router.get('/quantity', inventoryController.getQuantity);
+
+/**
+ * Route to fetch all item types.
+ * @name get/item-types
+ * @function
+ * @memberof module:routes/inventoryRoutes
+ * @inner
+ * @param {string} path - Express path.
+ * @param {function} middleware - Express middleware.
+ */
+router.get('/item-types', requireRoles(['admin']), inventoryController.getItemTypes);
+router.put('/update-max-quantity', requireRoles(['admin']), inventoryController.updateMaxQuantity);
 module.exports = router;

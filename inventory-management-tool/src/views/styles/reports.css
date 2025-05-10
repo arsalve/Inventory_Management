@@ -1,0 +1,41 @@
+/* Import Orbitron font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+body {
+    background-color: #272822;
+    color: #f8f8f2;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply fade-in animation to cards */
+.card {
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Update card font color for better readability */
+.card-title {
+    color: #ffd700; /* Gold color for titles */
+    font-weight: bold;
+}
+
+.card-text {
+    color: #ffffff; /* White color for text */
+    font-size: 1.2rem;
+}
+
+.card:hover {
+    transform: scale(1.05); /* Slightly enlarge the card */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Add shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}

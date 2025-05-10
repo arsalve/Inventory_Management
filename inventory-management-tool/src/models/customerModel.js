@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
  * @property {string} name - The name of the customer.
  * @property {string} email - The email of the customer.
  * @property {string} phone - The phone number of the customer.
+ * @property {string} address - The address of the customer.
  */
 const customerSchema = new mongoose.Schema({
     name: {
@@ -18,6 +19,10 @@ const customerSchema = new mongoose.Schema({
         unique: true
     },
     phone: {
+        type: String,
+        required: true
+    },
+    address: {
         type: String,
         required: true
     }

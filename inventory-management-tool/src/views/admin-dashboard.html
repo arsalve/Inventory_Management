@@ -6,36 +6,18 @@
     <title>Admin Dashboard</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="styles/dashboard.css" rel="stylesheet">
+    <link href="styles/styles.css" rel="stylesheet">
 </head>
 <body class="bg-dark text-light">
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        <a class="navbar-brand" href="#">Inventory Management</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="btn btn-primary nav-link" href="admin-dashboard.html">Admin Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="dashboard.html">Inventory Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="used-items.html">Used Items Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="customer-management.html">Customer Management</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="user-management.html">User Management</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="add-user.html">Add User</a>
-                </li>
-            </ul>
-            <span class="navbar-text" id="userRoleBox" style="border: 1px solid white; padding: 5px; border-radius: 5px; margin-left: auto;"></span>
-        </div>
-    </nav>
+    <!-- Include the common top navigation bar -->
+    <div id="navbar"></div>
+    <script>
+        fetch('common/navbar.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('navbar').innerHTML = data);
+    </script>
 
+    <!-- Customer Management Table -->
     <!-- Admin Dashboard Content -->
     <div class="container mt-5">
         <h1 class="text-center">Admin Dashboard</h1>
@@ -54,7 +36,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Used Items Dashboard</h5>
                         <p class="card-text">View and manage used items in the inventory.</p>
-                        <a href="used-items.html" class="btn btn-secondary">Go to Used Items</a>
+                        <a href="used-items.html" class="btn btn-primary">Go to Used Items</a>
                     </div>
                 </div>
             </div>
@@ -63,7 +45,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Customer Management</h5>
                         <p class="card-text">Manage customers, add new customers, and update existing customers.</p>
-                        <a href="customer-management.html" class="btn btn-secondary">Go to Customers</a>
+                        <a href="customer-management.html" class="btn btn-primary">Go to Customers</a>
                     </div>
                 </div>
             </div>
@@ -72,13 +54,57 @@
                     <div class="card-body">
                         <h5 class="card-title">User Management</h5>
                         <p class="card-text">Manage users, add new users, and update existing users.</p>
-                        <a href="user-management.html" class="btn btn-secondary">Go to Users</a>
+                        <a href="user-management.html" class="btn btn-primary">Go to Users</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="container mt-5">
+        <h2 class="text-center">Manage Max Quantity for Item Types</h2>
+        <div class="table-responsive">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Item Type</th>
+                        <th>Max Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="itemTypeTableBody">
+                    <!-- Item types will be dynamically populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<!-- Update Max Quantity Modal -->
+<div class="modal fade" id="updateMaxQuantityModal" tabindex="-1" role="dialog" aria-labelledby="updateMaxQuantityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateMaxQuantityModalLabel">Update Max Quantity</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="updateMaxQuantityForm">
+                    <div class="form-group">
+                        <label for="itemType">Item Type</label>
+                        <input type="text" id="itemType" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxQuantity">Max Quantity</label>
+                        <input type="number" id="maxQuantity" class="form-control" placeholder="Enter max quantity" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Loading Modal -->
     <div class="modal" id="loadingModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -102,9 +128,95 @@
             const payload = JSON.parse(atob(token.split('.')[1]));
             const role = payload.role;
             if (role === 'admin') {
-                document.getElementById('userRoleBox').textContent = 'Admin User';
+              //  document.getElementById('userRoleBox').textContent = 'Admin User';
             }
         }
+        document.addEventListener('DOMContentLoaded', () => {
+    // Handle the form submission to update max quantity
+    document.getElementById('updateMaxQuantityForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const itemType = document.getElementById('itemType').value;
+        const maxQuantity = parseInt(document.getElementById('maxQuantity').value);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('You are not authorized. Please log in.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const response = await fetch('/api/inventory/update-max-quantity', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ itemType, maxQuantity })
+        });
+
+        if (response.ok) {
+            alert('Max quantity updated successfully');
+            $('#updateMaxQuantityModal').modal('hide');
+            fetchItemTypes(); // Refresh the table
+        } else {
+            const error = await response.json();
+            alert(`Failed to update max quantity: ${error.message}`);
+        }
+    });
+});
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+}
+
+async function fetchItemTypes() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('You are not authorized. Please log in.');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/inventory/item-types', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            const contentType = response.headers.get('Content-Type');
+            if (contentType && contentType.includes('application/json')) {
+                const itemTypes = await response.json();
+                // Populate the table
+                const tableBody = document.getElementById('itemTypeTableBody');
+                tableBody.innerHTML = '';
+                itemTypes.forEach(type => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${type.type}</td>
+                        <td>${type.maxQuantity}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="openUpdateMaxQuantityModal('${type.type}', ${type.maxQuantity})">Edit</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                throw new Error('Invalid response format');
+            }
+        } else {
+            const error = await response.json();
+            alert(`Failed to fetch item types: ${error.message}`);
+        }
+    } catch (error) {
+        console.error('Error fetching item types:', error);
+        alert('An error occurred while fetching item types.');
+    }
+}
+
+// Call fetchItemTypes when the page loads
+document.addEventListener('DOMContentLoaded', fetchItemTypes);
     </script>
 </body>
 </html>

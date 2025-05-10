@@ -6,6 +6,9 @@
     <title>User Management</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="styles/dashboard.css" rel="stylesheet">
+    <link href="styles/styles.css" rel="stylesheet">
+    <link href="styles/reports.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body class="bg-dark text-light">
     <script>
@@ -25,43 +28,36 @@
             }
         }
     </script>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        <a class="navbar-brand" href="#">Inventory Management</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="btn btn-primary nav-link" href="dashboard.html">Inventory Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="used-items.html">Used Items Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="customer-management.html">Customer Management</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-secondary nav-link" href="user-management.html">User Management</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <!-- Include the common top navigation bar -->
+    <div id="navbar"></div>
+    <script>
+        fetch('common/navbar.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('navbar').innerHTML = data);
+    </script>
 
+    <!-- Customer Management Table -->
     <!-- User Management Table -->
     <div class="container mt-5">
         <h1 class="text-center">User Management</h1>
-        <table id="userTable" class="table table-striped table-dark">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Users will be populated here -->
-            </tbody>
-        </table>
-        <button class="btn btn-primary" data-toggle="modal" data-target="#createUserModal">Add User</button>
+        <div class="row">
+            <div class="col-md-12">
+                <table id="userTable" class="table table-striped table-dark">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Remove User</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Users will be populated here -->
+                    </tbody>
+                </table>
+                <button class="btn btn-success mt-3" data-toggle="modal" data-target="#createUserModal">Add User</button>
+            </div>
+        </div>
     </div>
 
     <!-- Create User Modal -->
